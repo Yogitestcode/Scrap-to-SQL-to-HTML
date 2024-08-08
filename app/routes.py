@@ -6,24 +6,26 @@ from app.db import pool
 import mysql.connector
 
 main = Blueprint('main', __name__)
-
 @main.route('/', methods=['GET', 'POST'])
-@login_required
 def index():
-    search_query = request.form.get('search_query') if request.method == 'POST' else ''
-    try:
-        cursor = g.db.cursor(dictionary=True)
-        if search_query:
-            query = "SELECT * FROM books WHERE title LIKE %s"
-            cursor.execute(query, (f"%{search_query}%",))
-        else:
-            cursor.execute("SELECT * FROM books")
-        books = cursor.fetchall()
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        books = []
-    finally:
-        cursor.close()
+    search_query = request.form.get('search_query')
+    books = []
+
+    if request.method == 'POST':
+        try:
+            cursor = g.db.cursor(dictionary=True)
+            if search_query:
+                query = "SELECT * FROM books WHERE title LIKE %s"
+                cursor.execute(query, (f"%{search_query}%",))
+            else:
+                cursor.execute("SELECT * FROM books")
+            books = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            books = []
+        finally:
+            if cursor:
+                cursor.close()
     return render_template('index.html', books=books, search_query=search_query)
 
 @main.route('/delete/<int:book_id>', methods=['POST'])
@@ -71,48 +73,3 @@ def update_book():
     finally:
         cursor.close()
     return redirect(url_for('main.index'))
-
-@main.route('/login', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
-        connection = pool.get_connection()
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        user = cursor.fetchone()
-        cursor.close()
-        connection.close()
-        if user and user['password'] == password:
-            user_obj = User(user['id'], user['username'], user['password'])
-            login_user(user_obj)
-            return redirect(url_for('main.index'))
-        else:
-            flash('Invalid username or password', 'danger')
-    return render_template('login.html', form=form)
-
-@main.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('main.login'))
-
-@main.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
-        try:
-            connection = pool.get_connection()
-            cursor = connection.cursor(dictionary=True)
-            cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
-            connection.commit()
-            cursor.close()
-            connection.close()
-            flash('You have successfully registered! Please log in.', 'success')
-            return redirect(url_for('main.login'))
-        except mysql.connector.Error as err:
-            flash(f"Error: {err}", 'danger')
-    return render_template('register.html', form=form)
