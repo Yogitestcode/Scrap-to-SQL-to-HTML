@@ -1,8 +1,9 @@
 from flask import Flask
 from flask_login import LoginManager
-from .routes import main
-from .db import pool
-from .models import User  # Make sure you import the User class
+from app.routes import main
+from app.db import pool
+from users.models import User
+from users.routes import users_bp  # Make sure you import the User class
 
 def create_app():
     app = Flask(__name__)
@@ -10,7 +11,7 @@ def create_app():
 
     login_manager = LoginManager()
     login_manager.init_app(app)
-    login_manager.login_view = 'main.login'
+    login_manager.login_view = 'users.login'
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -25,4 +26,5 @@ def create_app():
         return None
 
     app.register_blueprint(main)
+    app.register_blueprint(users_bp)
     return app

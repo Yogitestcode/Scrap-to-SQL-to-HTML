@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, g, flash
 from flask_login import login_user, login_required, logout_user, current_user
-from .forms import LoginForm, RegistrationForm
-from .models import User
-from .db import pool
+from users.forms import LoginForm, RegistrationForm
+from users.models import User
+from app.db import pool
 import mysql.connector
 
 main = Blueprint('main', __name__)
