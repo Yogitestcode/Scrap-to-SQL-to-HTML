@@ -7,25 +7,38 @@ import mysql.connector
 
 main = Blueprint('main', __name__)
 @main.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
-    search_query = request.form.get('search_query')
+    search_query = request.form.get('search_query', '')
     books = []
 
-    if request.method == 'POST':
-        try:
-            cursor = g.db.cursor(dictionary=True)
-            if search_query:
-                query = "SELECT * FROM books WHERE title LIKE %s"
-                cursor.execute(query, (f"%{search_query}%",))
-            else:
-                cursor.execute("SELECT * FROM books")
-            books = cursor.fetchall()
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            books = []
-        finally:
-            if cursor:
-                cursor.close()
+    # try:
+    #     cursor = g.db.cursor(dictionary=True)
+    #     if search_query:
+    #         query = "SELECT * FROM books WHERE title LIKE %s"
+    #         cursor.execute(query, (f"%{search_query}%",))
+    #     else:
+    #         cursor.execute("SELECT * FROM books")
+    #     books = cursor.fetchall()
+    # except mysql.connector.Error as err:
+    #     print(f"Error: {err}")
+    #     books = []
+    # finally:
+    #     if cursor:
+    #         cursor.close()
+    # return render_template('index.html', books=books, search_query=search_query)
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor(dictionary=True) as cursor:
+                if search_query:
+                    query = "SELECT * FROM books WHERE title LIKE %s"
+                    cursor.execute(query, (f"%{search_query}%",))
+                else:
+                    cursor.execute("SELECT * FROM books")
+                books = cursor.fetchall()
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        books = []
     return render_template('index.html', books=books, search_query=search_query)
 
 @main.route('/delete/<int:book_id>', methods=['POST'])
