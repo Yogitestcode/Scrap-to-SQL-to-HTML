@@ -8,7 +8,9 @@ def get_connection_pool():
         host="localhost",
         database='books_db',
         user='root',
-        password=''
+        password='',
+        charset='utf8mb4',
+        collation='utf8mb4_general_ci'
     )
 
     return pool
