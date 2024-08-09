@@ -3,7 +3,7 @@ from flask_login import LoginManager
 from app.routes import main
 from app.db import pool
 from users.models import User
-from users.routes import users_bp  # Make sure you import the User class
+from users.routes import users_bp
 
 def create_app():
     app = Flask(__name__)
