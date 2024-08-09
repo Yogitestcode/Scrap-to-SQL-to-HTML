@@ -32,11 +32,11 @@ def login():
     return render_template('login.html')
     
 
-@users_bp.route('/logout')
+@users_bp.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('main.index'))
+    return redirect(url_for('users.login'))
 
 @users_bp.route('/register', methods=['GET', 'POST'])
 def register():

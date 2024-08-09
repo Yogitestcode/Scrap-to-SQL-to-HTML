@@ -5,7 +5,7 @@ app = create_app()
 
 @app.route('/')
 def default_route():
-    return redirect(url_for('main.login'))
+    return redirect(url_for('users.login'))
 
 if __name__ == '__main__':
     app.run(debug=True)
