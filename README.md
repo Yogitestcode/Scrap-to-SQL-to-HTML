@@ -4,7 +4,8 @@ A Flask web app that scrapes books from a website and stores them in a MySQL dat
 
 ## Preview
 
-
+![Login Page](screenshots/books_SS1.jpg)
+![Main Page](screenshots/books_SS2.jpg)
 
 ### 🔧 Features
 - ✅ User registration & login (Flask-Login)
