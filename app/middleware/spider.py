@@ -61,11 +61,34 @@ def get_product_details(url):
     }
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
-
-
-    product_description = soup.find('div', attrs={"id" : 'product_description'}).find_next('p').text
-    print(f"Product description: {product_description}")
     
+    product_details = {}
+
+
+
+    # Product Description
+    product_description = soup.find('div', attrs={"id": 'product_description'}).find_next('p').text
+    product_details['description'] = product_description
+
+    
+    # Product Price
+    price = soup.find('p', class_='price_color').text.strip()
+    product_details['price'] = price
+
+    # Availability
+    availability = soup.find('p', class_='instock availability').text.strip()
+    product_details['availability'] = availability
+
+    # UPC, Product Type, etc.
+    product_info_table = soup.find('table', class_='table table-striped')
+    rows = product_info_table.find_all('tr')
+    for row in rows:
+        header = row.find('th').text.strip()
+        value = row.find('td').text.strip()
+        product_details[header] = value
+
+    return product_details
+
     #FOR MAKING DUMMY HTML
     #f = open('test.html' , 'w', encoding = 'utf-8')
    # f.write(response.text)
